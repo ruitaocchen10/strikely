@@ -11,3 +11,12 @@
 # 4.04.2026
 
 10:02 AM
+
+- Figuring the real value of MCP:
+  - For a short session/our MVP, MCP is overkill. But the value is when we get longer sessions and it becomes more difficult to dump all of the data straight to an agent. Once we start to implement the chat feature, it also allows us to query specific elements without having to re-inject all of the raw data into every message
+  - Also, the MCP server is a stable layer between the data and AI layers. If we, update the data layer, all we have to do is update the MCP tool implementations instead of the entire agent.
+- I was able to write a basic MCP server that returns specific Python tools and structured data responses for the AI to use.
+- Had some thoughts: How do we get to the point where we can build a flexible system that isn't just a rule-based vision review. We don't need to create something that just says "Keep your chin down and your hands up" - those things can be helpful for beginners but aren't really huge insights. Some ideas for this maybe:
+  - Reviewing different aspects: mechanics, technique, movement, etc.
+  - Connecting outcome to techniques: Would be for later if we implement sparring
+  - Having objective rules as well as some more flexible rules
