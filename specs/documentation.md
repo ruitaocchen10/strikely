@@ -6,3 +6,8 @@
 - Creating the FastAPI entry point first which includes routers from other modules and any middleware.
 - Creating schema using Pydantic which defines data and has type validation. Built on top of FastAPI. Schema basically defines strikes and issues, a session analysis for the agent to read, and a agent review.
 - Going to use a mock SessionAnalysis for now to test the MCP integration and the Agent response, because I think the CV writing is going to be the hardest part, and I want to focus more on MCP and FastAPI anyways.
+- MCP integration is next. For now, we're really just including some basic tools like getting an analysis, flag list, strike list, etc. but I'm hoping this might be more useful in the future if I can allow a user to chat with the agent about more specifics in their training footage.
+
+# 4.04.2026
+
+10:02 AM
