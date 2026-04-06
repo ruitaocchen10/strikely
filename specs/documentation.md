@@ -33,3 +33,4 @@
 
 - Okay, after doing some reading, essentially the way MCP works is that we give our agent a "tool list" at the beginning, which is exactly what it sounds like, a list of tools that the agent can call.
 - Once my agent has the list it can decide when and what tools to call. I've essentially now written into my coach.py a list of tools that I have, and a loop for my model to give it the available tools, and then respond to a prompt with the given tools it has until it receives the desired output. I guess this is generally how MCP works.
+- Next, I have to write the POST route which actually runs the generate report function on my mock data for now. This should be a really simple POST API route that just returns the generate report function with my mock data as a parameter

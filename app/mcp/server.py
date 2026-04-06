@@ -1,44 +1,32 @@
 from mcp.server.fastmcp import FastMCP
 from app.schemas import SessionAnalysis
 
-def create_mcp_server(analysis: SessionAnalysis) -> FastMCP:
-    mcp = FastMCP("strikely")
 
-    @mcp.tool()
+def get_tool_functions(analysis: SessionAnalysis) -> dict:
     def get_session_summary() -> dict:
-        """
-        Returns overall stats for the training session: duration, total strike count,
-        breakdown by strike type, and a count of technique flags by type.
-        """
         strike_type_counts = {}
         for strike in analysis.detected_strikes:
             key = strike.type.value
             strike_type_counts[key] = strike_type_counts.get(key, 0) + 1
-        
+
         flag_type_counts = {}
-        for flag in analysis.quality_flags:                                               
-            key = flag.flag_type.value                    
+        for flag in analysis.quality_flags:
+            key = flag.flag_type.value
             flag_type_counts[key] = flag_type_counts.get(key, 0) + 1
 
         return {
-            "duration_seconds": analysis.duration_seconds,                                
+            "duration_seconds": analysis.duration_seconds,
             "total_strikes": len(analysis.detected_strikes),
-            "strikes_by_type": strike_type_counts,                                        
+            "strikes_by_type": strike_type_counts,
             "total_flags": len(analysis.quality_flags),
-            "flags_by_type": flag_type_counts,                                            
+            "flags_by_type": flag_type_counts,
         }
-    
-    @mcp.tool()
+
     def get_strike_list() -> list:
-        """
-        Returns all detected strikes in the session. Each entry includes the strike id,
-        type, hand, timestamp, and number of technique flags. Use get_strike_detail(id)   
-        to get full flag details for a specific strike.                                   
-        """                                                                               
-        flags_per_strike = {}                                                             
-        for flag in analysis.quality_flags:                                               
+        flags_per_strike = {}
+        for flag in analysis.quality_flags:
             flags_per_strike[flag.strike_id] = flags_per_strike.get(flag.strike_id, 0) + 1
-                                                                                        
+
         return [
             {
                 "id": strike.id,
@@ -50,13 +38,7 @@ def create_mcp_server(analysis: SessionAnalysis) -> FastMCP:
             for strike in analysis.detected_strikes
         ]
 
-    @mcp.tool()
     def get_strike_detail(strike_id: str) -> dict:
-        """
-        Returns full details for a single strike by id, including its type, hand,
-        timing, and all associated technique flags with severity and descriptions.
-        Returns an error key if the strike id is not found.
-        """
         strike = next((s for s in analysis.detected_strikes if s.id == strike_id), None)
         if strike is None:
             return {"error": f"No strike found with id '{strike_id}'"}
@@ -82,13 +64,7 @@ def create_mcp_server(analysis: SessionAnalysis) -> FastMCP:
             "flags": flags,
         }
 
-    @mcp.tool()
     def get_flag_list(flag_type: str | None = None) -> list:
-        """
-        Returns all technique flags raised in the session. Optionally filter by
-        flag_type (guard_dropped, chin_exposed, overextended, hip_rotation_limited).
-        Each entry includes the strike id, timestamp, flag type, severity, and description.
-        """
         strike_timestamps = {s.id: s.timestamp for s in analysis.detected_strikes}
 
         flags = list(analysis.quality_flags)
@@ -105,5 +81,20 @@ def create_mcp_server(analysis: SessionAnalysis) -> FastMCP:
             }
             for flag in flags
         ]
+
+    return {
+        "get_session_summary": get_session_summary,
+        "get_strike_list": get_strike_list,
+        "get_strike_detail": get_strike_detail,
+        "get_flag_list": get_flag_list,
+    }
+
+
+def create_mcp_server(analysis: SessionAnalysis) -> FastMCP:
+    mcp = FastMCP("strikely")
+    fns = get_tool_functions(analysis)
+
+    for fn in fns.values():
+        mcp.tool()(fn)
 
     return mcp

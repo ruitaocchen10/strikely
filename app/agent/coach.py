@@ -1,8 +1,8 @@
 import json
 import os
-from anthropic import Anthropic
+from anthropic import AsyncAnthropic
 from app.schemas import SessionAnalysis, CoachReport, Issue
-from app.mcp.server import create_mcp_server
+from app.mcp.server import get_tool_functions
 
 SYSTEM_PROMPT = """
 You are an experienced boxing coach reviewing a student's training footage.
@@ -71,16 +71,9 @@ TOOLS = [
     },
 ]
 
-def generate_report(analysis: SessionAnalysis) -> CoachReport:
-    client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    mcp = create_mcp_server(analysis)
-
-    tool_functions = {
-        "get_session_summary": mcp._tool_manager.tools["get_session_summary"].fn,
-        "get_strike_list":     mcp._tool_manager.tools["get_strike_list"].fn,
-        "get_strike_detail":   mcp._tool_manager.tools["get_strike_detail"].fn,
-        "get_flag_list":       mcp._tool_manager.tools["get_flag_list"].fn,
-    }
+async def generate_report(analysis: SessionAnalysis) -> CoachReport:
+    client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    tool_functions = get_tool_functions(analysis)
 
     messages = [{"role": "user", "content": "Please analyse this training session and produce a coaching report."}]
 
@@ -90,7 +83,7 @@ def generate_report(analysis: SessionAnalysis) -> CoachReport:
     while iterations < max_iterations:
         iterations += 1
 
-        response = client.messages.create(
+        response = await client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=4096,
             system=SYSTEM_PROMPT,
@@ -117,8 +110,10 @@ def generate_report(analysis: SessionAnalysis) -> CoachReport:
 
         messages.append({"role": "user", "content": tool_results})
 
-    final_text = next(b.text for b in response.content if hasattr(b, "text"))
-    data = json.loads(final_text)
+    final_text = "".join(b.text for b in response.content if hasattr(b, "text") and b.text.strip())
+    start = final_text.index("{")
+    end = final_text.rindex("}") + 1
+    data = json.loads(final_text[start:end])
 
     return CoachReport(
         summary=data["summary"],
