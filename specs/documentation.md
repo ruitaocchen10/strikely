@@ -20,3 +20,16 @@
   - Reviewing different aspects: mechanics, technique, movement, etc.
   - Connecting outcome to techniques: Would be for later if we implement sparring
   - Having objective rules as well as some more flexible rules
+
+# 4.05.2026
+
+11:06 PM
+
+- I kind of forgot to take notes before, but I'm at the point now where I need to figure out how to make the agent use tools from the MCP server to give a response.
+
+# 4.06.2026
+
+9:49 AM
+
+- Okay, after doing some reading, essentially the way MCP works is that we give our agent a "tool list" at the beginning, which is exactly what it sounds like, a list of tools that the agent can call.
+- Once my agent has the list it can decide when and what tools to call. I've essentially now written into my coach.py a list of tools that I have, and a loop for my model to give it the available tools, and then respond to a prompt with the given tools it has until it receives the desired output. I guess this is generally how MCP works.
