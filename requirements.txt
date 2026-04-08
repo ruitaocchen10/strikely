@@ -4,3 +4,6 @@ python-multipart
 anthropic
 mcp
 python-dotenv
+opencv-python
+mediapipe
+numpy

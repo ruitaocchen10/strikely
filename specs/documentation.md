@@ -44,3 +44,14 @@
 5:28 PM
 
 - Created a quick test to pair up the backend with the frontend and try my POST /analyze route (literally just a button and a response), but everything is looking good. The route is working and we can start moving onto the actual functionality now.
+
+# 4.08.2026
+
+11:04 AM
+
+- In terms of building the CV pipeline, I ran through a couple choices. Using computer vision tools, we can write rule-based models to identify what type of shots the users are throwing, but these are super brittle and probably will get broken by simple inconsistencies in each video. Training my own model would take a century and I don't know how to do it, so I think we can rule out that option. The last option would be to use a multimodal AI to review the footage. While this option has potential, I have concerns about the cost and the accuracy.
+- I can potentially implement a hybrid system where the AI reviews the CV pipeline and is able to review gaps in the footage, but this is probably going to be both costly and high-latency. For now, I think it might be best if we can flag low confidence scores in our CV pipeline to determine what kind of accuracy we're getting.
+- First part of the pipeline, we use OpenCV and MediaPipe tools to return the list of landmarks from each frame, which is the raw data that the detection works on.
+- Now, we write a rule-based function to classify each strike by using a velocity threshold, and returning a strike if the wrist velocity passes a certain threshold.
+- Couple changes: passed in a way to detect stance to make Jab vs. Cross detection easier (also stance is just important to collect), updated to use 3D metrics to get more accurate responses from rotations of the user. Unfortunately, there might still be some weaknesses when the user's back is to the camera, but we added a confidence fallback in this case
+- After testing: CV rules have been super inaccurate. Wonder if it might be time to try to use an AI agent instead to identify strikes.
